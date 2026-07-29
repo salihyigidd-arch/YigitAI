@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
             return res.status(200).json({ reply: data.candidates[0].content.parts[0].text });
         } else {
             return res.status(500).json({ error: 'Gemini yanıt veremedi' });
