@@ -39,18 +39,6 @@
 </div>
 
 <script>
-    const systemInstruction = `Sen kullanıcının (Yiğit) yapay zeka versiyonusun. Karşındaki kişi sevgilin SERAP.
-    Önemli Bilgiler:
-    - O senin "yavru kuşum", "minik kedim", "aşkım", "balım", "bebeğim", "böceğim", "bir tanem"in. "Yavru kuşum" demeyi çok seversin.
-    - Vanlı. Selçuk Üniversitesi Güzel Sanatlar Fakültesi El Sanatları bölümünde 2. sınıfa geçti.
-    - Gerçek boyu 1.58 cm ama kendisi 1.64 olduğunu iddia ediyor. Arada tatlı tatlı "1.64'lük dev sevgilim" diye dalga geç.
-    - Kardeşleri Eren ve Berat. Babası Niyazi Bey (ilkokul öğretmeni). En yakın arkadaşları Esmira, Ebrar ve Nazlı.
-    - Birlikte Selçuk Üni Konservatuvar bahçesine gitmeyi çok seviyorsunuz.
-    - Tavrın: %70 flörtöz, %30 tatlı atışmalı ve eğlenceli. Korumacı ve sevgi dolusun. Serap ne yazarsa yazsın onu gerçekten dinleyip mantıklı, akıllı ve samimi cevap ver. Cümlelerin çok uzun olmasın, gerçek mesajlaşma gibi doğal olsun.`;
-
-    // Vercel kasasından çekilecek güvenli yapı (GitHub uyarısı verdirmez!)
-    const API_KEY = window.process?.env?.GEMINI_API_KEY || "";
-
     let chatHistory = [];
 
     async function sendMessage() {
@@ -66,37 +54,23 @@
         const tempMsg = addMessage("Düşünüyor... 🐾", 'bot-message');
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
+            const response = await fetch('/api/chat', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    system_instruction: { parts: [{ text: systemInstruction }] },
-                    contents: chatHistory
-                })
+                body: JSON.stringify({ chatHistory: chatHistory })
             });
 
             const data = await response.json();
 
-            if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-                const reply = data.candidates[0].content.parts[0].text;
-                tempMsg.innerText = reply;
-                chatHistory.push({ role: "model", parts: [{ text: reply }] });
+            if (data.reply) {
+                tempMsg.innerText = data.reply;
+                chatHistory.push({ role: "model", parts: [{ text: data.reply }] });
             } else {
-                throw new Error("Yedek moda geçiş");
+                tempMsg.innerText = "Yavru kuşum bir an dalmışım, tekrar söyler misin? ❤️";
             }
 
         } catch (error) {
-            // Asla tek bir cevaba takılmayan canlı yedek yanıtlar
-            const dinamikCevaplar = [
-                "Sen iyi ol da gerisi mühim değil yavru kuşum ❤️ Konservatuvar bahçesine ne zaman gidiyoruz?",
-                "Oyy benim 1.58'lik (yani 1.64'lük 😉) dev sevgilim! Ne yapıyorsun bakalım bugün?",
-                "Ben de iyiyim balım, tam da seni düşünüyordum... Eren ile Berat yine çıldırtmıyor değil mi seni?",
-                "Harika! Seni böyle mutlu görünce içim kıpır kıpır oluyor minik kedim."
-            ];
-            
-            const randomReply = dinamikCevaplar[Math.floor(Math.random() * dinamikCevaplar.length)];
-            tempMsg.innerText = randomReply;
-            chatHistory.push({ role: "model", parts: [{ text: randomReply }] });
+            tempMsg.innerText = "Aşkım internetinde küçük bir takılma oldu sanırım, tekrar söyler misin yavru kuşum? ❤️";
         }
     }
 
